@@ -12,6 +12,8 @@ class AuthProvider with ChangeNotifier {
   User? get user => _user;
   bool get isAuthenticated => _token != null;
   bool get isLoading => _isLoading;
+  bool _isInit = false;
+  bool get isInit => _isInit;
 
   final String baseUrl = 'https://gigil-backend.onrender.com/api/auth'; // Production server
 
@@ -77,6 +79,36 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  Future<void> loginWithPhoneOTP(String phone, String otp) async {
+    // Mock OTP Login
+    _isLoading = true;
+    notifyListeners();
+    await Future.delayed(const Duration(seconds: 1)); // Simulate network
+
+    if (otp == '1234') { // Mock acceptable OTP
+      // Create a mock user since we skip backend for this demo
+      _token = 'mock_phone_token_${DateTime.now().millisecondsSinceEpoch}';
+      _user = User(
+        id: 'phone_${phone}',
+        username: phone,
+        email: '$phone@gigil.app',
+        avatar: '',
+        bio: ''
+      );
+      
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('token', _token!);
+      await prefs.setString('user', jsonEncode(_user!.toJson()));
+    } else {
+      _isLoading = false;
+      notifyListeners();
+      throw Exception('Invalid OTP. Use 1234');
+    }
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
   Future<void> logout() async {
     _user = null;
     _token = null;
@@ -102,5 +134,21 @@ class AuthProvider with ChangeNotifier {
     } catch (e) {
       rethrow;
     }
+  }
+
+  Future<bool> tryAutoLogin() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!prefs.containsKey('token') || !prefs.containsKey('user')) {
+      _isInit = true;
+      notifyListeners();
+      return false;
+    }
+    
+    _token = prefs.getString('token');
+    final userData = jsonDecode(prefs.getString('user')!);
+    _user = User.fromJson(userData);
+    _isInit = true;
+    notifyListeners();
+    return true;
   }
 }

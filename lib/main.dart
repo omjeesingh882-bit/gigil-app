@@ -56,13 +56,20 @@ class AuthWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = Provider.of<AuthProvider>(context);
-    
-    // If authenticated, go to Dashboard, else Login
-    if (authProvider.isAuthenticated) {
-      return const DashboardScreen();
-    } else {
-      return const LoginScreen();
-    }
+    return Consumer<AuthProvider>(
+      builder: (context, auth, _) {
+        if (auth.isAuthenticated) {
+          return const DashboardScreen();
+        } else if (!auth.isInit) {
+          return FutureBuilder(
+            future: auth.tryAutoLogin(),
+            builder: (ctx, snapshot) =>
+                const Scaffold(body: Center(child: CircularProgressIndicator())),
+          );
+        } else {
+          return const LoginScreen();
+        }
+      },
+    );
   }
 }
