@@ -188,9 +188,29 @@ class _RoomScreenState extends State<RoomScreen> {
                   flex: 1,
                   child: Column(
                     children: [
-                      const Expanded(
-                        // Chat messages go here (Need a separate widget to listen to chat stream)
-                        child: Center(child: Text('Chat messages area')),
+                      Expanded(
+                        child: Container(
+                          color: Colors.black26,
+                          child: ListView.builder(
+                            itemCount: roomProv.messages.length,
+                            itemBuilder: (context, index) {
+                              final msg = roomProv.messages[index];
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '${msg['username']}: ',
+                                      style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.tealAccent),
+                                    ),
+                                    Expanded(child: Text(msg['text'])),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ),
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),

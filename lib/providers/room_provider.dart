@@ -8,6 +8,7 @@ class RoomProvider with ChangeNotifier {
   String? _roomCode;
   List<User> _users = [];
   List<dynamic> _playlist = [];
+  List<Map<String, dynamic>> _messages = [];
   dynamic _currentSong;
   bool _isHost = false;
   String? _hostId;
@@ -15,6 +16,7 @@ class RoomProvider with ChangeNotifier {
   String? get roomCode => _roomCode;
   List<User> get users => _users;
   List<dynamic> get playlist => _playlist;
+  List<Map<String, dynamic>> get messages => _messages;
   dynamic get currentSong => _currentSong;
   bool get isHost => _isHost;
 
@@ -62,6 +64,15 @@ class RoomProvider with ChangeNotifier {
     _socket!.on('song_changed', (data) {
       _currentSong = data;
       // Audio player logic will listen to this
+      notifyListeners();
+    });
+
+    _socket!.on('new_message', (data) {
+      _messages.add({
+        'text': data['text'],
+        'username': data['username'],
+        'timestamp': data['timestamp']
+      });
       notifyListeners();
     });
   }
