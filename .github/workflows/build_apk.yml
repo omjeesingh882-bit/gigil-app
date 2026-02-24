@@ -30,7 +30,7 @@ jobs:
         run: flutter pub get
 
       - name: Generate Android platform files
-        run: flutter create --platforms android .
+        run: flutter create --project-name gigil --platforms android .
 
       - name: Build APK
         run: flutter build apk --release
