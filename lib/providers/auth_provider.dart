@@ -89,11 +89,10 @@ class AuthProvider with ChangeNotifier {
       // Create a mock user since we skip backend for this demo
       _token = 'mock_phone_token_${DateTime.now().millisecondsSinceEpoch}';
       _user = User(
-        id: 'phone_${phone}',
+        id: 'phone_$phone',
         username: phone,
         email: '$phone@gigil.app',
         avatar: '',
-        bio: ''
       );
       
       final prefs = await SharedPreferences.getInstance();
