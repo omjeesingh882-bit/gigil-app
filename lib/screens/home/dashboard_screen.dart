@@ -40,8 +40,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final user = Provider.of<AuthProvider>(context).user;
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: const Text('Dashboard'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -49,50 +52,87 @@ class _DashboardScreenState extends State<DashboardScreen> {
           )
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Welcome, ${user?.username ?? "User"}',
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 48),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.add),
-              label: const Text('Create a New Room'),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                backgroundColor: Colors.deepPurple,
-              ),
-              onPressed: _createRoom,
-            ),
-            const SizedBox(height: 48),
-            const Text('Or join an existing room:', style: TextStyle(fontSize: 18)),
-            const SizedBox(height: 16),
-            Row(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.deepPurple, Colors.black],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Expanded(
-                  child: TextField(
-                    controller: _roomCodeCtrl,
-                    decoration: const InputDecoration(
-                      labelText: 'Room Code',
-                      border: OutlineInputBorder(),
+                Text(
+                  'Welcome, ${user?.username ?? "User"}',
+                  style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
+                ),
+                const SizedBox(height: 48),
+                Card(
+                  color: Colors.white.withOpacity(0.1),
+                  elevation: 8,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      children: [
+                        const Icon(Icons.music_video, size: 64, color: Colors.tealAccent),
+                        const SizedBox(height: 16),
+                        ElevatedButton.icon(
+                          icon: const Icon(Icons.add),
+                          label: const Text('Create a New Room', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                          style: ElevatedButton.styleFrom(
+                            minimumSize: const Size(double.infinity, 50),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            backgroundColor: Colors.deepPurpleAccent,
+                            foregroundColor: Colors.white,
+                          ),
+                          onPressed: _createRoom,
+                        ),
+                      ],
                     ),
                   ),
                 ),
-                const SizedBox(width: 16),
-                ElevatedButton(
-                  onPressed: _joinRoom,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                const SizedBox(height: 48),
+                const Text('Or join an existing room:', style: TextStyle(fontSize: 18, color: Colors.white70)),
+                const SizedBox(height: 16),
+                Card(
+                  color: Colors.white.withOpacity(0.1),
+                  elevation: 8,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      children: [
+                        TextField(
+                          controller: _roomCodeCtrl,
+                          decoration: const InputDecoration(
+                            labelText: 'Room Code',
+                            border: OutlineInputBorder(),
+                            prefixIcon: Icon(Icons.meeting_room)
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: _joinRoom,
+                          style: ElevatedButton.styleFrom(
+                            minimumSize: const Size(double.infinity, 50),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            backgroundColor: Colors.tealAccent.shade700,
+                            foregroundColor: Colors.white,
+                          ),
+                          child: const Text('Join Room', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        )
+                      ],
+                    ),
                   ),
-                  child: const Text('Join'),
                 )
               ],
-            )
-          ],
+            ),
+          ),
         ),
       ),
     );
