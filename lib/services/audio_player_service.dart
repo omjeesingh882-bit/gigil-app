@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:just_audio/just_audio.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 class AudioPlayerService {
   final AudioPlayer _player = AudioPlayer();
@@ -25,7 +26,21 @@ class AudioPlayerService {
 
   void _initSocketListeners() {
     socket.on('song_changed', (song) async {
-      await _player.setUrl(song['url']);
+      String audioUrl = song['url'];
+      if (audioUrl.contains('youtube.com') || audioUrl.contains('youtu.be')) {
+        try {
+          final yt = YoutubeExplode();
+          var video = await yt.videos.get(audioUrl);
+          var manifest = await yt.videos.streamsClient.getManifest(video.id);
+          var streamInfo = manifest.audioOnly.withHighestBitrate();
+          audioUrl = streamInfo.url.toString();
+          yt.close();
+        } catch (e) {
+          print('Error parsing YT link: $e');
+        }
+      }
+      
+      await _player.setUrl(audioUrl);
       if (isHost) {
         _player.play();
       }

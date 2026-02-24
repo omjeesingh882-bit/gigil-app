@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../providers/room_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/audio_player_service.dart';
+import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 class RoomScreen extends StatefulWidget {
   const RoomScreen({super.key});
@@ -38,14 +39,29 @@ class _RoomScreenState extends State<RoomScreen> {
     super.dispose();
   }
 
-  void _addSong() {
+  void _addSong() async {
     final url = _songUrlCtrl.text.trim();
     if (url.isNotEmpty) {
       final user = Provider.of<AuthProvider>(context, listen: false).user;
+      String title = 'Song ${DateTime.now().second}';
+      String artist = 'Unknown Artist';
+      
+      if (url.contains('youtube.com') || url.contains('youtu.be')) {
+        try {
+          final yt = YoutubeExplode();
+          var video = await yt.videos.get(url);
+          title = video.title;
+          artist = video.author;
+          yt.close();
+        } catch (e) {
+          print(e);
+        }
+      }
+
       final song = {
         'id': DateTime.now().millisecondsSinceEpoch.toString(),
-        'title': 'Song ${DateTime.now().second}', // Placeholder for title fetch
-        'artist': 'Unknown Artist',
+        'title': title,
+        'artist': artist,
         'url': url,
         'addedBy': user?.username
       };
@@ -127,7 +143,7 @@ class _RoomScreenState extends State<RoomScreen> {
                       child: TextField(
                         controller: _songUrlCtrl,
                         decoration: const InputDecoration(
-                          hintText: 'Paste MP3 URL',
+                          hintText: 'Paste MP3/YouTube URL',
                           isDense: true,
                         ),
                       ),
