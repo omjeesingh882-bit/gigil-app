@@ -4,6 +4,9 @@ import '../../providers/room_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/audio_player_service.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class RoomScreen extends StatefulWidget {
   const RoomScreen({super.key});
@@ -67,6 +70,49 @@ class _RoomScreenState extends State<RoomScreen> {
       };
       Provider.of<RoomProvider>(context, listen: false).addSong(song);
       _songUrlCtrl.clear();
+    }
+  }
+
+  void _uploadLocalAudio() async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.audio);
+      if (result != null && result.files.single.path != null) {
+        final file = result.files.single;
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Uploading audio... Please wait.')));
+        }
+        
+        final request = http.MultipartRequest('POST', Uri.parse('https://gigil-backend.onrender.com/api/upload'));
+        request.files.add(await http.MultipartFile.fromPath('audio', file.path!));
+        
+        final response = await request.send();
+        if (response.statusCode == 200) {
+          final resData = await response.stream.bytesToString();
+          final data = jsonDecode(resData);
+          final url = 'https://gigil-backend.onrender.com' + data['url'];
+          
+          final user = Provider.of<AuthProvider>(context, listen: false).user;
+          final song = {
+            'id': DateTime.now().millisecondsSinceEpoch.toString(),
+            'title': file.name,
+            'artist': 'Local Upload',
+            'url': url,
+            'addedBy': user?.username
+          };
+          if (mounted) {
+            Provider.of<RoomProvider>(context, listen: false).addSong(song);
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Upload complete!')));
+          }
+        } else {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Upload failed on server')));
+          }
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error selecting file: $e')));
+      }
     }
   }
 
@@ -147,6 +193,11 @@ class _RoomScreenState extends State<RoomScreen> {
                           isDense: true,
                         ),
                       ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.upload_file),
+                      tooltip: 'Upload Local Audio',
+                      onPressed: _uploadLocalAudio,
                     ),
                     IconButton(
                       icon: const Icon(Icons.add_to_photos),
