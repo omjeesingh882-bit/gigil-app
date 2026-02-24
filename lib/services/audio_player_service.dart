@@ -27,6 +27,8 @@ class AudioPlayerService {
   void _initSocketListeners() {
     socket.on('song_changed', (song) async {
       String audioUrl = song['url'];
+      bool shouldPlay = true;
+
       if (audioUrl.contains('youtube.com') || audioUrl.contains('youtu.be')) {
         try {
           final yt = YoutubeExplode();
@@ -37,12 +39,19 @@ class AudioPlayerService {
           yt.close();
         } catch (e) {
           print('Error parsing YT link: $e');
+          shouldPlay = false; // Abort playback if YT extraction fails
         }
       }
       
-      await _player.setUrl(audioUrl);
-      if (isHost) {
-        _player.play();
+      if (shouldPlay) {
+        try {
+          await _player.setUrl(audioUrl);
+          if (isHost) {
+            _player.play();
+          }
+        } catch (e) {
+          print('JustAudio Error loading URL: $e');
+        }
       }
     });
 
