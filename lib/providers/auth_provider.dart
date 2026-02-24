@@ -85,4 +85,22 @@ class AuthProvider with ChangeNotifier {
     await prefs.remove('user');
     notifyListeners();
   }
+
+  Future<String?> forgotPassword(String email) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/forgot-password'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email}),
+      );
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return data['tempPassword'];
+      } else {
+        throw Exception(data['msg'] ?? 'Password reset failed');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
