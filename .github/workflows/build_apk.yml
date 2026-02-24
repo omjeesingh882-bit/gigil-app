@@ -32,6 +32,10 @@ jobs:
       - name: Generate Android platform files
         run: flutter create --project-name gigil --platforms android .
 
+      - name: Add Internet Permission to AndroidManifest
+        run: |
+          sed -i '/<application/i \    <uses-permission android:name="android.permission.INTERNET" />' android/app/src/main/AndroidManifest.xml
+
       - name: Build APK
         run: flutter build apk --release
 
